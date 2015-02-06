@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+	<head>
+	<meta charset="UTF-8">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+	<script type="text/javascript">//<![CDATA[ 
+		var textQueue = [];
+		var fileContent = "";
+
+		window.onload=function(){
+			
+			// POPULATE TEXT
+			function wrapText(context, text, x, y, maxWidth, lineHeight) {
+				var words = text.split(' ');
+				var line = '';
+
+				for(var n = 0; n < words.length; n++) {
+					var testLine = line + words[n] + ' ';
+					var metrics = context.measureText(testLine);
+					var testWidth = metrics.width;
+					if (testWidth > maxWidth && n > 0) {
+						context.fillText(line, x, y);
+						line = words[n] + ' ';
+						y += lineHeight;
+					} else {
+						line = testLine;
+					}
+				}
+				context.fillText(line, x, y);
+			}
+
+			// BUILD CANVAS
+			function buildCanvas(mytext, myfile) {
+				var canvas = document.getElementById('myCanvas');
+				var context = canvas.getContext('2d');
+				var canvasWidth = 3288;
+				var canvasHeight = 4488;
+				canvas.width = canvasWidth;
+				canvas.height = canvasHeight;
+				var maxWidth = 2400;
+				var fontSize = 249;
+				var lineHeight = Math.round(fontSize * 1.2);
+				var x = (canvasWidth - maxWidth) / 2;
+				var y = 690;
+				var lengthWarning = 175;
+				var text = mytext;
+
+				if(text.length > lengthWarning)
+				{
+					console.log("Text might be too long: "+text);
+				}
+				
+				context.font = "bold "+fontSize+"px 'Helvetica Neue'";
+				context.fillStyle = '#ff0000';
+				context.ineCap = "round";
+
+				var backg = new Image();
+
+				backg.onload = function() {
+					context.drawImage(backg, 0, 0);
+					wrapText(context, text, x, y, maxWidth, lineHeight);
+					var canvasData = canvas.toDataURL("image/png");
+					//console.log(canvasData);
+
+					$.ajax({
+						type: "POST",
+						url: "imageCreator.php",
+						data: { data: canvasData, filename: myfile }
+					})
+					.done(function( msg ) {
+						console.log( "Data Saved: " + msg );
+						triggerNext();
+					});
+				};
+				backg.src = './img/card-template-transcard.png';
+			};
+			
+			// TRIGGER NEXT
+			function triggerNext()
+			{
+				if(textQueue.length > 0)
+				{
+					var i = textQueue.pop();
+					buildCanvas(i.txt, i.file);
+				}
+			}
+
+			// READ FILE
+			function readTextFile(file)
+			{
+			    var rawFile = new XMLHttpRequest();
+			    rawFile.open("GET", file, false);
+			    rawFile.onreadystatechange = function ()
+			    {
+			        if(rawFile.readyState === 4)
+			        {
+			            if(rawFile.status === 200 || rawFile.status == 0)
+			            {
+			                var rfd = rawFile.responseText;
+			                fileContent = rfd.split("\n");
+			            }
+			        }
+			    }
+			    rawFile.send(null);
+			}
+
+
+
+			// ###################
+
+			// prompt in order to enter filename
+			var fileInName = prompt("Enter the filename", "white.txt");
+
+			// read file
+			readTextFile(fileInName);
+			console.log("We read: " + fileContent.length + " Lines");
+
+			// populate queue
+			var fileLine = 0;
+			fileContent.forEach(function(line) {
+			    var tmpItm = { txt: line, file: "dummy_"+fileLine };
+			    textQueue.push(tmpItm);
+			    fileLine++;
+			});
+			
+			// http://localhost/~maximilianporzelt/CAH%20-%20Max/generator-wrap.html
+
+			//Initial Build
+			//buildCanvas("Die Augen und Eier eines Mannes herausnehmen und seine Augen am Lendenbereich und die Hoden in den Augenhöhlen befestigen. das ist nur ein test der möglichen länge! WaWaWa LaLa", "file1");
+
+		};//]]>  
+
+	</script>
+	</head>
+	<body>
+		<canvas class="canv" id="myCanvas" width=3288 height=4488></canvas>
+	</body>
+</html>

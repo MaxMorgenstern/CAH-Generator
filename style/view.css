@@ -1,6 +1,6 @@
 body
 {
-	background:#333366;
+	background:#67727B;
 	font-family:"Lucida Grande", Tahoma, Arial, Verdana, sans-serif;
 	font-size:small;
 	margin:8px 0 16px;
@@ -58,7 +58,7 @@ form.appnitro
 /**** Logo Section  *****/
 h1
 {
-	background-color:#666699;
+	background-color:#000000;
 	margin:0;
 	min-height:0;
 	padding:0;
@@ -875,4 +875,9 @@ margin:15px -16px -10px -20px;
 width: 100%;
 border: 0px;
 background-color: lightgray;
+}
+#progressbar{
+width: 100%;
+margin-left: 2px;
+margin-bottom: -8px;
 }

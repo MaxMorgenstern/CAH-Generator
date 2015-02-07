@@ -61,7 +61,7 @@
 				if(text.length > 0) {
 					if (CardColor == "black") {
 						textColor = '#ffffff';
-						cardBackImage = 'black' + cardType(text);
+						cardBackImage = 'black' + pickCardType(text);
 					};
 
 					if (CardColor == "test") {
@@ -69,7 +69,7 @@
 						cardBackImage = 'card-template-transcard';
 					}
 
-					text = textClean(text);
+					text = createPlaceholder(textClean(text));
 
 					context.font = "bold "+fontSize+"px 'Helvetica Neue'";
 					context.fillStyle = textColor;
@@ -112,7 +112,7 @@
 				return str;
 			}
 
-			function cardType(str)
+			function pickCardType(str)
 			{
 				var mechanic = "-mechanic-";
 				if(str.match(/[[2]]/gi)){ return mechanic+"p2"; }
@@ -128,24 +128,32 @@
 				}
 				return "";
 			}
+
+			function createPlaceholder(str)
+			{
+				str = str.replace (/_+/gi, '______');
+				return str;
+			}
 			
 			// TRIGGER NEXT
 			function triggerNext()
 			{
 				if(TextQueue.length > 0)
 				{
-					/*
-					var spent = new Date()-StartDate;
 					var allItems = FileContent.length;
 					var todoItems = TextQueue.length;
 					var doneItems = allItems-todoItems;
+					/*
+					var spent = new Date()-StartDate;
 					var secondsestimate = (spent/doneItems*todoItems)/1000;
 					console.log(secondsestimate + " Seconds to go!");
 					 */
+					document.getElementById('progressbar').value = Math.floor(100/allItems*doneItems);
 					
 					var i = TextQueue.pop();
 					buildCanvas(i.txt, i.file);
 				} else {
+					document.getElementById('progressbar').value = 100;
 					log("Done!");
 				}
 			}
@@ -180,6 +188,8 @@
 				FileName = $( "#element_1" ).val();
 				CardColor = $( "#element_3" ).val();
 				OutputName = $( "#element_2" ).val();
+
+				$( "#progressbar" ).value = 0;
 
 				StartDate = new Date();
 				log("Card creation started... \n" + StartDate);
@@ -239,7 +249,8 @@
 		<form id="form_967104" class="appnitro"  method="post" action="">
 			<div class="form_description">
 				<h2>CAH Generator</h2>
-				<p>Cards Against Humanity custom card generator.</p>
+				<p><a href="http://cardsagainsthumanity.com/">Cards Against Humanity</a> custom card generator. <br/>
+					<small> - by Maximilian Porzelt</small></p>
 			</div>						
 			<ul >
 				<li id="li_1" >
@@ -275,11 +286,13 @@
 				</li>
 			</ul>
 			<div id="consolelog" class="consolelog" style="display:none">
-				<textarea rows="10" id="consolearea" style=""></textarea>
+				<textarea rows="10" id="consolearea"></textarea>
+				<progress value="0" max="100" id="progressbar"></progress>
 			</div>
+
 		</form>
 	</div>
 	<img id="bottom" src="style/bottom.png" alt="">
-	<canvas class="canv" id="myCanvas" width=3288 height=4488></canvas>
+	<canvas style="display:none" class="canv" id="myCanvas" width=3288 height=4488></canvas>
 	</body>
 </html>

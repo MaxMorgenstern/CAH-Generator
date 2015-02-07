@@ -12,6 +12,7 @@
 		var FileName = "";
 		var CardColor = "";
 		var OutputName = "";
+		var CardIcon = "";
 
 		window.onload=function(){
 			
@@ -50,23 +51,46 @@
 				var y = 690;
 				var lengthWarning = 175;
 				var text = mytext;
+				var textColor = '#000000';
+				var cardBackImage = 'white';
 
-				if(text.length > lengthWarning)
-				{
+				if(text.length > lengthWarning) {
 					console.log("Text might be too long: "+text);
+				};
+
+				if (CardColor == "black") {
+					textColor = '#ffffff';
+					cardBackImage = 'black';
+
+					switch(CardIcon) {
+						case "d2p3":
+							cardBackImage += "-mechanic-d2p3";
+							break;
+						case "p2":
+							cardBackImage += "-mechanic-p2";
+							break;
+						case "gears":
+							cardBackImage += "-mechanic-gears";
+							break;
+					}
+				};
+				if (CardColor == "test") {
+					textColor = '#ff0000';
+					cardBackImage = 'card-template-transcard';
 				}
 				
+
 				context.font = "bold "+fontSize+"px 'Helvetica Neue'";
-				context.fillStyle = '#ff0000';
+				context.fillStyle = textColor;
 				context.ineCap = "round";
 
 				var backg = new Image();
+				backg.src = "./img/"+cardBackImage+".png";
 
 				backg.onload = function() {
 					context.drawImage(backg, 0, 0);
 					wrapText(context, text, x, y, maxWidth, lineHeight);
 					var canvasData = canvas.toDataURL("image/png");
-					//console.log(canvasData);
 
 					$.ajax({
 						type: "POST",
@@ -78,7 +102,7 @@
 						triggerNext();
 					});
 				};
-				backg.src = './img/card-template-transcard.png';
+				
 			};
 			
 			// TRIGGER NEXT
@@ -110,10 +134,7 @@
 			    rawFile.send(null);
 			}
 
-
-
 			// ###################
-
 
 			document.getElementById("saveForm").onclick = function () { 
 				FileName = $( "#element_1" ).val();
@@ -132,18 +153,17 @@
 				    fileLine++;
 				});
 
-				buildCanvas("Started at...", "_1 README");
+				buildCanvas("Thanks for using my Cards Against Humanity Card Generator. - Max (www.porzelt.net)", "_1 README");
 
 				return false;
 			};
-			
-			// http://localhost/~maximilianporzelt/CAH%20-%20Max/index.html
-
-			//Initial Build
-			//buildCanvas("Die Augen und Eier eines Mannes herausnehmen und seine Augen am Lendenbereich und die Hoden in den Augenhöhlen befestigen. das ist nur ein test der möglichen länge! WaWaWa LaLa", "file1");
-
 		};//]]>  
-
+/*
+	function tick2(){
+		$('#ticker_02 li:first').slideUp( function () { $(this).appendTo($('#ticker_02')).slideDown(); });
+	}
+	setInterval(function(){ tick2 () }, 3000);
+ */
 	</script>
 </head>
 <body id="main_body" >
@@ -167,8 +187,9 @@
 					<label class="description" for="element_3">Card Color </label>
 					<div>
 						<select class="element select medium" id="element_3" name="element_3"> 
-							<option value="1" selected="selected">White</option>
-							<option value="2" >Black</option>
+							<option value="white" selected="selected">White</option>
+							<option value="black" >Black</option>
+							<option value="test" >Test</option>
 						</select>
 					</div>
 					<p class="guidelines" id="guide_3"><small>Select the color of the card you want to create</small></p> 
@@ -185,7 +206,12 @@
 					<input id="saveForm" class="button_text" type="submit" name="submit" value="Submit" />
 				</li>
 			</ul>
-		</form>	
+		</form>
+
+<ul id="ticker_02" class="ticker">
+
+</ul>
+
 	</div>
 	<img id="bottom" src="style/bottom.png" alt="">
 	<canvas class="canv" id="myCanvas" width=3288 height=4488></canvas>

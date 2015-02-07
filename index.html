@@ -13,6 +13,7 @@
 		var CardColor = "";
 		var OutputName = "";
 		var CardIcon = "";
+		var StartDate = new Date();
 
 		window.onload=function(){
 			
@@ -55,7 +56,7 @@
 				var cardBackImage = 'white';
 
 				if(text.length > lengthWarning) {
-					console.log("Text might be too long: "+text);
+					log("Text might be too long: "+text);
 				};
 
 				if (CardColor == "black") {
@@ -98,7 +99,7 @@
 						data: { data: canvasData, filename: myfile }
 					})
 					.done(function( msg ) {
-						console.log( "Data Saved: " + msg );
+						log( "Data Saved: " + msg + ".png" );
 						triggerNext();
 					});
 				};
@@ -110,6 +111,15 @@
 			{
 				if(TextQueue.length > 0)
 				{
+					/*
+					var spent = new Date()-StartDate;
+					var allItems = FileContent.length;
+					var todoItems = TextQueue.length;
+					var doneItems = allItems-todoItems;
+					var secondsestimate = (spent/doneItems*todoItems)/1000;
+					console.log(secondsestimate + " Seconds to go!");
+					 */
+					
 					var i = TextQueue.pop();
 					buildCanvas(i.txt, i.file);
 				}
@@ -134,6 +144,11 @@
 			    rawFile.send(null);
 			}
 
+			function log(text){
+				$('#consolearea').append(text + "\n"); 
+				$('#consolearea').scrollTop($('#consolearea')[0].scrollHeight - $('#consolearea').height());
+			}
+
 			// ###################
 
 			document.getElementById("saveForm").onclick = function () { 
@@ -141,9 +156,12 @@
 				CardColor = $( "#element_3" ).val();
 				OutputName = $( "#element_2" ).val();
 
+				StartDate = new Date();
+				log("Card creation started... \n" + StartDate);
+
 				// read file
 				readTextFile(FileName);
-				console.log("We read: " + FileContent.length + " Lines");
+				log("We read: " + FileContent.length + " Lines");
 
 				// populate queue
 				var fileLine = 0;
@@ -152,11 +170,15 @@
 				    TextQueue.push(tmpItm);
 				    fileLine++;
 				});
+				
+				$("#consolelog").show();
 
 				buildCanvas("Thanks for using my Cards Against Humanity Card Generator. - Max (www.porzelt.net)", "_1 README");
 
 				return false;
 			};
+
+
 		};//]]>  
 /*
 	function tick2(){
@@ -169,7 +191,7 @@
 <body id="main_body" >
 	<img id="top" src="style/top.png" alt="">
 	<div id="form_container">
-		<h1><a>CAH Generator</a></h1>
+		<h1><a class="headlink" href="http://www.porzelt.net"></a></h1>
 		<form id="form_967104" class="appnitro"  method="post" action="">
 			<div class="form_description">
 				<h2>CAH Generator</h2>
@@ -206,12 +228,10 @@
 					<input id="saveForm" class="button_text" type="submit" name="submit" value="Submit" />
 				</li>
 			</ul>
+			<div id="consolelog" class="consolelog" style="display:none">
+				<textarea rows="10" id="consolearea" style=""></textarea>
+			</div>
 		</form>
-
-<ul id="ticker_02" class="ticker">
-
-</ul>
-
 	</div>
 	<img id="bottom" src="style/bottom.png" alt="">
 	<canvas class="canv" id="myCanvas" width=3288 height=4488></canvas>

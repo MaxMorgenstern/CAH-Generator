@@ -12,7 +12,6 @@
 		var FileName = "";
 		var CardColor = "";
 		var OutputName = "";
-		var CardIcon = "";
 		var StartDate = new Date();
 
 		window.onload=function(){
@@ -59,52 +58,76 @@
 					log("Text might be too long: "+text);
 				};
 
-				if (CardColor == "black") {
-					textColor = '#ffffff';
-					cardBackImage = 'black';
+				if(text.length > 0) {
+					if (CardColor == "black") {
+						textColor = '#ffffff';
+						cardBackImage = 'black' + cardType(text);
+					};
 
-					switch(CardIcon) {
-						case "d2p3":
-							cardBackImage += "-mechanic-d2p3";
-							break;
-						case "p2":
-							cardBackImage += "-mechanic-p2";
-							break;
-						case "gears":
-							cardBackImage += "-mechanic-gears";
-							break;
+					if (CardColor == "test") {
+						textColor = '#ff0000';
+						cardBackImage = 'card-template-transcard';
 					}
-				};
-				if (CardColor == "test") {
-					textColor = '#ff0000';
-					cardBackImage = 'card-template-transcard';
-				}
-				
 
-				context.font = "bold "+fontSize+"px 'Helvetica Neue'";
-				context.fillStyle = textColor;
-				context.ineCap = "round";
+					text = textClean(text);
 
-				var backg = new Image();
-				backg.src = "./img/"+cardBackImage+".png";
+					context.font = "bold "+fontSize+"px 'Helvetica Neue'";
+					context.fillStyle = textColor;
+					context.ineCap = "round";
 
-				backg.onload = function() {
-					context.drawImage(backg, 0, 0);
-					wrapText(context, text, x, y, maxWidth, lineHeight);
-					var canvasData = canvas.toDataURL("image/png");
+					var backg = new Image();
+					backg.src = "./img/"+cardBackImage+".png";
 
-					$.ajax({
-						type: "POST",
-						url: "imageCreator.php",
-						data: { data: canvasData, filename: myfile }
-					})
-					.done(function( msg ) {
-						log( "Data Saved: " + msg + ".png" );
-						triggerNext();
-					});
-				};
-				
+					backg.onload = function() {
+						context.drawImage(backg, 0, 0);
+						wrapText(context, text, x, y, maxWidth, lineHeight);
+						var canvasData = canvas.toDataURL("image/png");
+
+						$.ajax({
+							type: "POST",
+							url: "imageCreator.php",
+							data: { data: canvasData, filename: myfile }
+						})
+						.done(function( msg ) {
+							log( "Data Saved: " + msg + ".png" );
+							triggerNext();
+						});
+					};
+				} else {
+					log( "No Data found. Skip.");
+					triggerNext();
+				}	
 			};
+
+			function textClean(str)
+			{
+				str = str.replace ('\“', '\"');
+				str = str.replace ('\”', '\"');
+				str = str.replace ('\’', '\'');
+				str = str.replace ('[[2]]', '');
+				str = str.replace ('[[3]]', '');
+				str = str.replace ('[[G]]', '');
+				str = str.replace ('[[g]]', '');
+				str = str.trim();
+				return str;
+			}
+
+			function cardType(str)
+			{
+				var mechanic = "-mechanic-";
+				if(str.match(/[[2]]/gi)){ return mechanic+"p2"; }
+				if(str.match(/[[3]]/gi)){ return mechanic+"d2p3"; }
+				if(str.match(/[[G]]/gi)){ return mechanic+"gears"; }
+				
+				try {
+					var blanks = str.match(/_+/gi).length;
+					if (blanks == 2 ) {return mechanic+"p2"; }
+					if (blanks == 3 ) {return mechanic+"d2p3"; }
+				} catch (e) {
+					console.log(e);
+				}
+				return "";
+			}
 			
 			// TRIGGER NEXT
 			function triggerNext()
@@ -122,6 +145,8 @@
 					
 					var i = TextQueue.pop();
 					buildCanvas(i.txt, i.file);
+				} else {
+					log("Done!");
 				}
 			}
 
@@ -160,9 +185,12 @@
 				log("Card creation started... \n" + StartDate);
 
 				// read file
-				readTextFile(FileName);
-				log("We read: " + FileContent.length + " Lines");
-
+				if(FileName != "" && FileContent == ""){
+					readTextFile(FileName);
+					log("We read: " + FileContent.length + " Lines");
+				} else {
+					log("Uploaded file has: " + FileContent.length + " Lines");
+				}
 				// populate queue
 				var fileLine = 0;
 				FileContent.forEach(function(line) {
@@ -173,19 +201,35 @@
 				
 				$("#consolelog").show();
 
-				buildCanvas("Thanks for using my Cards Against Humanity Card Generator. - Max (www.porzelt.net)", "_1 README");
+				buildCanvas("Thanks for using my\n'Cards Against Humanity' Card Generator.\n - Max\n  www.porzelt.net", "_1 README");
 
 				return false;
 			};
-
-
 		};//]]>  
-/*
-	function tick2(){
-		$('#ticker_02 li:first').slideUp( function () { $(this).appendTo($('#ticker_02')).slideDown(); });
-	}
-	setInterval(function(){ tick2 () }, 3000);
- */
+
+		function fileSelected() {
+			var input = document.getElementById('element_1_upload');
+			
+		    // Create a reader object
+		    var reader = new FileReader();
+		    if (input.files.length) {
+		        var textFile = input.files[0];
+		        reader.readAsText(textFile);
+		        $(reader).on('load', processFile);
+		    } else {
+		        alert('Please upload a file before continuing')
+		    } 
+		}
+
+		function processFile(e) {
+		    var file = e.target.result,
+		        results;
+		    if (file && file.length) {
+		        FileContent = file.split("\n");
+		    	console.log("File Uploaded: " + FileContent.length + " lines.");
+		    }
+		}
+
 	</script>
 </head>
 <body id="main_body" >
@@ -199,9 +243,11 @@
 			</div>						
 			<ul >
 				<li id="li_1" >
-					<label class="description" for="element_1">Filename </label>
+					<label class="description" for="element_1">Filename or select file</label>
 					<div>
-						<input id="element_1" name="element_1" class="element text medium" type="text" maxlength="255" value="white.txt"/> 
+						<input id="element_1" name="element_1" class="element text medium" type="text" maxlength="255" />
+						<br/><br/>
+						<input type="file" name="element_1_upload" id="element_1_upload" onchange="fileSelected();" />
 					</div>
 					<p class="guidelines" id="guide_1"><small>Enter the name of the file.</small></p> 
 				</li>

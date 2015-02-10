@@ -100,8 +100,10 @@ window.onload=function(){
 		str = str.replace ('[[3]]', '');
 		str = str.replace ('[[G]]', '');
 		str = str.replace ('[[g]]', '');
+		if (str[str.length-1] === ".")
+			str = str.slice(0,-1);
 		str = str.trim();
-		return str;
+		return str+".";
 	}
 
 	function pickCardType(str)

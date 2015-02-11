@@ -78,11 +78,16 @@ window.onload=function(){
 				$.ajax({
 					type: "POST",
 					url: "imageCreator.php",
-					data: { data: canvasData, filename: myfile }
-				})
-				.done(function( msg ) {
-					log( "Data Saved: " + msg + ".png" );
-					triggerNext();
+					data: { data: canvasData, filename: myfile },
+					success: function (msg) {
+						log( "Data Saved: " + msg + ".png" );
+						triggerNext();
+					},
+					error: function (request, status, error) {
+						log(request.responseText);
+						log(status);
+						log(error);
+					}
 				});
 			};
 		} else {
@@ -189,7 +194,7 @@ window.onload=function(){
 		log("Card creation started... \n" + StartDate);
 
 		// read file
-		if(FileName != "" && FileContent == ""){
+		if(FileName !== "" && FileContent === ""){
 			readTextFile(FileName);
 			log("We read: " + FileContent.length + " Lines");
 		} else {

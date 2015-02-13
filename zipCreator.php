@@ -2,6 +2,9 @@
 $passed_folder = '';
 if (isset($_POST["folder"])) {
 	$passed_folder = $_POST["folder"] . "/";
+
+}elseif (isset($_GET["folder"])) {
+	$passed_folder = $_GET["folder"] . "/";
 }
 
 $working_dir = __DIR__.'/generated/'.$passed_folder;

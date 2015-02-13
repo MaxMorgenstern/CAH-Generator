@@ -8,6 +8,8 @@ var StartDate = new Date();
 
 window.onload=function(){
 	
+	$('#batch-id').attr('value', 'id_' + (Date.now()*Math.random()*100000).toString(36));
+
 	// POPULATE TEXT
 	function wrapText(context, text, x, y, maxWidth, lineHeight) {
 		var words = text.split(' ');
@@ -74,11 +76,11 @@ window.onload=function(){
 				context.drawImage(backg, 0, 0);
 				wrapText(context, text, x, y, maxWidth, lineHeight);
 				var canvasData = canvas.toDataURL("image/png");
-
+				var batch = $('#batch-id').val();
 				$.ajax({
 					type: "POST",
 					url: "imageCreator.php",
-					data: { data: canvasData, filename: myfile },
+					data: { data: canvasData, filename: myfile, folder:batch },
 					success: function (msg) {
 						log( "Data Saved: " + msg + ".png" );
 						triggerNext();
@@ -154,6 +156,13 @@ window.onload=function(){
 		} else {
 			document.getElementById('progressbar').value = 100;
 			log("Done!");
+
+			var batch = $('#batch-id').val();
+			log("");
+			log("Trigger download of batch: '" + batch + "'...");
+			setTimeout(function() {
+				window.location.href = "zipCreator.php?folder="+batch;
+			}, 1500);
 		}
 	}
 
